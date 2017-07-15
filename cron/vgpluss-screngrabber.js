@@ -47,7 +47,7 @@ page.onLoadFinished = function(status) {
         width: plusArticles[l].position.width,
         height: plusArticles[l].position.height,
       };
-      page.render('images/' + foldername + '/vgpluss' + (l + 1) + '.png');
+      page.render('images/' + foldername + '/vgpluss' + (l + 1) + '.jpg');
     }
   }, 10000);
   page.exit();
