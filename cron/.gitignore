@@ -1,0 +1,3 @@
+node_modules/
+cron/images/
+!cron/images/.gitkeep
