@@ -1,6 +1,4 @@
 const page = require('webpage').create();
-const date = new Date();
-const foldername = date.toISOString().split('T')[0];
 
 page.viewportSize = { width: 1920, height: 1080 };
 page.settings.userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36';
@@ -17,6 +15,9 @@ page.onLoadFinished = function(status) {
   }
   const plusArticles = page.evaluate(function() {
     const plusArticles = [];
+    const date = new Date();
+    const today = date.toISOString().split('T')[0];
+
     const articles = document.getElementsByClassName('article-content');
     for (i = 0; i < articles.length; i++) {
       const links = articles[i].getElementsByTagName('a');
@@ -28,8 +29,13 @@ page.onLoadFinished = function(status) {
               imgs[k].src = imgs[k].getAttribute('data-src');
             }
           }
+          const qPos = links[j].href.indexOf('?');
+          const link = links[j].href.substring(0, qPos != -1 ? qPos : links[j].href.length);
           plusArticles.push({
             article: articles[i],
+            title: articles[i].innerText,
+            link: link,
+            date: today,
             position: articles[i].getBoundingClientRect(),
           });
           break;
@@ -47,7 +53,7 @@ page.onLoadFinished = function(status) {
         width: plusArticles[l].position.width,
         height: plusArticles[l].position.height,
       };
-      page.render('images/' + foldername + '/vgpluss' + (l + 1) + '.jpg');
+      page.render('images/' + plusArticles[l].date + '/vgpluss' + (l + 1) + '.jpg');
     }
   }, 10000);
   page.exit();
