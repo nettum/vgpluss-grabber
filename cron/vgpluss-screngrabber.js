@@ -4,14 +4,40 @@ page.viewportSize = { width: 1920, height: 1080 };
 page.settings.userAgent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36';
 page.open('http://www.vg.no/');
 
-page.onConsoleMessage = function(msg) {
-  console.log(msg);
-}
+// page.onConsoleMessage = function(msg) {
+//   console.log(msg);
+// };
+
+// page.onResourceRequested = function(requestData) {
+//   console.info('Requesting', requestData.url);
+// };
+
+// page.onError = function(msg, trace) {
+//   var msgStack = ['PAGE ERROR: ' + msg];
+//   if (trace && trace.length) {
+//     msgStack.push('TRACE:');
+//     trace.forEach(function(t) {
+//       msgStack.push(' -> ' + t.file + ': ' + t.line + (t.function ? ' (in function "' + t.function +'")' : ''));
+//     });
+//   }
+//   console.error(msgStack.join('\n'));
+// };
+
+// phantom.onError = function(msg, trace) {
+//   var msgStack = ['PHANTOM ERROR: ' + msg];
+//   if (trace && trace.length) {
+//     msgStack.push('TRACE:');
+//     trace.forEach(function(t) {
+//       msgStack.push(' -> ' + (t.file || t.sourceURL) + ': ' + t.line + (t.function ? ' (in function ' + t.function +')' : ''));
+//     });
+//   }
+//   console.log(msgStack.join('\n'));
+// };
 
 page.onLoadFinished = function(status) {
   if (status !== 'success') {
     console.log('Not able to load vg.no, exiting...');
-    page.exit();
+    phantom.exit();
   }
   const plusArticles = page.evaluate(function() {
     const plusArticles = [];
@@ -31,9 +57,12 @@ page.onLoadFinished = function(status) {
           }
           const qPos = links[j].href.indexOf('?');
           const link = links[j].href.substring(0, qPos != -1 ? qPos : links[j].href.length);
+          const lastSlashPos = link.lastIndexOf('/');
+          const plusId = link.substr(lastSlashPos + 1);
           plusArticles.push({
+            id: plusId,
             article: articles[i],
-            title: articles[i].innerText,
+            title: articles[i].innerText.trim().replace(/(?:\r\n|\r|\n)/g, ' '),
             link: link,
             date: today,
             position: articles[i].getBoundingClientRect(),
@@ -53,8 +82,8 @@ page.onLoadFinished = function(status) {
         width: plusArticles[l].position.width,
         height: plusArticles[l].position.height,
       };
-      page.render('images/' + plusArticles[l].date + '/vgpluss' + (l + 1) + '.jpg');
+      page.render('images/' + plusArticles[l].date + '/' + plusArticles[l].id + '.jpg');
     }
+    phantom.exit();
   }, 10000);
-  page.exit();
 };
